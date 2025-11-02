@@ -32,10 +32,6 @@
   <link rel="manifest" href="./images/icons/site.webmanifest">
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Firebase App (the core Firebase SDK) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <!-- Firebase Database -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; }
@@ -270,7 +266,7 @@
     <div class="container mx-auto px-6">
       <div class="text-center mb-12">
         <h2 class="text-3xl md:text-4xl font-bold mb-4">Актуальные курсы валют</h2>
-        <p class="text-gray-400 text-lg">Для сумм до 5 000 у.е. Обновляется ежедневно</p>
+        <p class="text-gray-400 text-lg">Для сумм от 5 000 у.е. Обновляется ежедневно</p>
             <p class="text-lg font-semibold">
       💰 Для обмена <span class="text-teal-400 font-bold">больших сумм</span> звоните — 
       курс будет <span class="text-yellow-400 font-bold">выгоднее</span>!
@@ -567,46 +563,6 @@
   </footer>
   <script defer src="./js/javascript.js"></script>
   <script type="module">
-
-  // Import the functions you need from the SDKs you need
-
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
-
-  // TODO: Add SDKs for Firebase products that you want to use
-
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-
-  // Your web app's Firebase configuration
-
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
-  const firebaseConfig = {
-
-    //apiKey: "***",
-
-    authDomain: "oper-kassa.firebaseapp.com",
-
-    //databaseURL: "https://oper-kassa-default-rtdb.europe-********",
-
-    projectId: "oper-kassa",
-
-    storageBucket: "oper-kassa.firebasestorage.app",
-
-    messagingSenderId: "769811650511",
-
-    //appId: "1:769811650511:web:***************",
-
-    measurementId: "G-K8SMBQEYJT"
-
-  };
-
-  const app = initializeApp(firebaseConfig);
-
-  const analytics = getAnalytics(app);
-
 </script>
 </body>
 </html>

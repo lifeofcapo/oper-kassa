@@ -1,32 +1,10 @@
-const firebaseConfig = {
-    //databaseURL: "https://oper-kassa-default-rtdb.europe-*******"
-};
+// const apiUrl = "https://api.oper-kassa.online/api/rates";
 
 let currencies = [];
-let app, database;
-let firebaseLoaded = false;
-
-function initializeFirebase() {
-    try {
-        if (typeof firebase !== 'undefined' && firebase.app) {
-            app = firebase.initializeApp(firebaseConfig);
-            database = firebase.database();
-            firebaseLoaded = true;
-            console.log("Firebase initialized successfully");
-            return true;
-        } else {
-            console.warn("Firebase SDK not available");
-            return false;
-        }
-    } catch (error) {
-        console.warn("Firebase initialization failed:", error);
-        return false;
-    }
-}
 
 async function loadCurrencies() {
     console.log("Starting currency loading process...");
-    
+
     const grid = document.getElementById('currencyGrid');
     if (grid) {
         grid.innerHTML = `
@@ -36,51 +14,43 @@ async function loadCurrencies() {
             </div>
         `;
     }
-    
-    if (initializeFirebase()) {
-        try {
-            await loadCurrenciesFromFirebase();
-            return; 
-        } catch (error) {
-            console.warn("Firebase load failed, trying fallbacks...");
-        }
+
+    try {
+        await loadCurrenciesFromMongo();
+        return;
+    } catch (error) {
+        console.warn("MongoDB Atlas load failed:", error);
     }
-    
+
     try {
         await loadCurrenciesFromCBR();
-        return; // 
+        return;
     } catch (error) {
-        console.warn("CBR load failed, using static data...");
+        console.warn("CBR load failed:", error);
     }
-    
-    loadStaticCurrencies();
+
+    console.warn("Mongo и CBR не доступны. Загружаем локальный JSON...");
+    try {
+        await loadStaticJsonCurrencies();
+        return;
+    } catch {
+        console.warn("Локальный JSON не найден!!!");
+    }
 }
 
-function loadCurrenciesFromFirebase() {
-    return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-            reject(new Error("Firebase timeout"));
-        }, 5000);
-
-        const currenciesRef = database.ref('currencies');
-        currenciesRef.on('value', (snapshot) => {
-            clearTimeout(timeout);
-            const data = snapshot.val();
-            
-            if (data && Array.isArray(data) && data.length > 0) {
-                console.log("Currencies loaded from Firebase:", data);
-                currencies = data;
-                displayCurrencies();
-                setupCalculator();
-                resolve();
-            } else {
-                reject(new Error("No data in Firebase"));
-            }
-        }, (error) => {
-            clearTimeout(timeout);
-            reject(error);
-        });
-    });
+async function loadCurrenciesFromMongo() {
+    try {
+        const response = await fetch(apiUrl, { method: 'GET', headers: { 'Accept': 'application/json' } });
+        if (!response.ok) throw new Error("API response not ok");
+        const data = await response.json();
+        currencies = data.currencies; 
+        console.log("Currencies loaded from Mongo API:", currencies);
+        displayCurrencies();
+        setupCalculator();
+    } catch (error) {
+        console.error("Error loading from Mongo API:", error);
+        throw error;
+    }
 }
 
 async function loadCurrenciesFromCBR() {
@@ -159,28 +129,15 @@ async function loadCurrenciesFromCBR() {
     }
 }
 
-async function loadStaticCurrencies() {
-    try {
-        const response = await fetch('./data/currencies.json');
-        if (response.ok) {
-            const data = await response.json();
-            currencies = data.currencies;
-            console.log("Currencies loaded from local JSON");
-        } else {
-            throw new Error('Local JSON not found');
-        }
-    } catch (error) {
-        console.log("Using built-in static currencies");
-        currencies = [
-            { code: 'USD_BLUE', flag: 'us', name: 'Доллар США (синий)', buy: 81.0, sell: 81.9, showRates: true },
-            { code: 'USD_WHITE', flag: 'us', name: 'Доллар США (белый)', buy: 79.0, sell: 81.0, showRates: true },
-            { code: 'EUR', flag: 'eu', name: 'Евро', buy: 94.0, sell: 95.5, showRates: true },
-            { code: 'GBP', flag: 'gb', name: 'Фунт стерлингов', buy: 110.0, sell: 115.0, showRates: false },
-            { code: 'CNY', flag: 'cn', name: 'Китайский юань', buy: 11.5, sell: 12.0, showRates: false },
-            { code: 'RUB', flag: 'ru', name: 'Российский рубль', buy: 1, sell: 1, showRates: true }
-        ];
-    }
-    
+async function loadStaticJsonCurrencies() {
+    const response = await fetch('./js/currencies.json');
+    if (!response.ok) throw new Error("Local JSON not found");
+
+    const data = await response.json();
+    currencies = data.currencies;
+
+    console.log("✅ Currencies loaded from local JSON");
+
     displayCurrencies();
     setupCalculator();
 }
